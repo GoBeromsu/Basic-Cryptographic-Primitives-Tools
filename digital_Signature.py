@@ -15,7 +15,8 @@ iv = get_random_bytes(16)
 key_aes = get_random_bytes(32)
 
 # Message to be encrypted
-message = b'This is a 3333secret message'
+# message = b'This is a 3333secret message'
+message = bytes(input().encode())
 
 # Encrypt the message using AES-CBC
 cipher = AES.new(key_aes, AES.MODE_CBC, iv=iv)
@@ -37,6 +38,6 @@ if hash1 == hash2:
     print('Hashes match. Decryption successful.')
     cipher = AES.new(key_aes, AES.MODE_CBC, iv=iv)
     decrypted_message = unpad(cipher.decrypt(enc), AES.block_size)
-    print('Decrypted message:', decrypted_message)
+    print('Decrypted message:', decrypted_message.decode())
 else:
     print('Hashes do not match. Decryption unsuccessful.')
