@@ -46,4 +46,4 @@ aes_cipher = AES.new(key, AES.MODE_EAX, nonce=nonce)
 plaintext = aes_cipher.decrypt(ciphertext)
 
 print(verify)
-print(plaintext.decode())
+print(plaintext)
