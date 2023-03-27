@@ -1,45 +1,29 @@
-from Crypto.Cipher import AES
-from Crypto.Util.Padding import pad, unpad
-from Crypto.Random import get_random_bytes
+from Crypto.PublicKey import RSA
+from Crypto.Cipher import PKCS1_OAEP
 import base64
+# 키 생성
+key = RSA.generate(2048)
 
-def aes_encrypt(m, key, mode):
-    iv = get_random_bytes(16)
-    if mode == AES.MODE_ECB:
-        cipher = AES.new(key, mode)
-    else:    
-        cipher = AES.new(key, mode, iv)
-    ciphertext = cipher.encrypt(pad(m, AES.block_size))
-    return iv + ciphertext
+# 공개키(Pu)와 비공개키(Pr) 추출
+Pu = key.publickey()
+Pr = key
 
-def aes_decrypt(ciphertext, key, mode):
-    iv = ciphertext[:16]
-    ciphertext = ciphertext[16:]
-    if mode == AES.MODE_ECB:
-        cipher = AES.new(key, mode)
-    else:
-        cipher = AES.new(key, mode, iv)
-    return unpad(cipher.decrypt(ciphertext), AES.block_size).decode()
+# 메시지 암호화
+def rsa_encrypt(m, Pu):
+    cipher = PKCS1_OAEP.new(Pu)
+    ciphertext = cipher.encrypt(m)
+    return ciphertext
 
+# 암호문 복호화
+def rsa_decrypt(ciphertext, Pr):
+    cipher = PKCS1_OAEP.new(Pr)
+    plaintext = cipher.decrypt(ciphertext)
+    return plaintext
+
+# 테스트
 def start():
-    m = bytes(input().encode())
-    key = get_random_bytes(16)
-    ecb_cipher = aes_encrypt(m, key, AES.MODE_ECB)
-    cbc_cipher = aes_encrypt(m, key, AES.MODE_CBC)
-    cfb_cipher = aes_encrypt(m, key, AES.MODE_CFB)
-    ofb_cipher = aes_encrypt(m, key, AES.MODE_OFB)
-
-    print("ECB ciphertext:", ecb_cipher)
-    print("CBC ciphertext:", cbc_cipher)
-    print("CFB ciphertext:", cfb_cipher)
-    print("OFB ciphertext:", ofb_cipher)
-
-    ecb_plaintext = aes_decrypt(ecb_cipher, key, AES.MODE_ECB)
-    cbc_plaintext = aes_decrypt(cbc_cipher, key, AES.MODE_CBC)
-    cfb_plaintext = aes_decrypt(cfb_cipher, key, AES.MODE_CFB)
-    ofb_plaintext = aes_decrypt(ofb_cipher, key, AES.MODE_OFB)
-
-    print("ECB plaintext:", ecb_plaintext)
-    print("CBC plaintext:", cbc_plaintext)
-    print("CFB plaintext:", cfb_plaintext)
-    print("OFB plaintext:", ofb_plaintext)
+    message = bytes(input().encode())
+    ciphertext = rsa_encrypt(message, Pu)
+    plaintext = rsa_decrypt(ciphertext, Pr).decode()
+    print(f"Ciphertext: {base64.b64encode(ciphertext).decode()}")
+    print(f"Plaintext: {plaintext}")
